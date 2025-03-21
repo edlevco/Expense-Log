@@ -2,6 +2,8 @@
 from tkgui import ui
 import tkinter as tk
 
+
+
 # Create the main window
 window = tk.Tk()
 window.title("Expense Log")
