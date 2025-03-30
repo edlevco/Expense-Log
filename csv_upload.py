@@ -1,178 +1,151 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
-from tkinter import messagebox
+from tkinter import ttk, filedialog, messagebox
 import csv
-
 import db
 
 def get_csv_data():
-
     db.create_category_table()
 
     def validate_data(file, entry, dropdown):
-        if entry == "" and not dropdown == "None":
+        if entry == "" and dropdown != "None":
             categorize_data(file, dropdown)
-        elif not entry == "" and dropdown == "None":
+        elif entry != "" and dropdown == "None":
             categorize_data(file, entry)
         else:
-            messagebox.showerror("Error", "Enter a new name or select existing")
+            messagebox.showerror("Error", "Enter a new name or select an existing one.")
 
-    def get_file_name(file):
-
-
+    def get_file_name(file_path):
         for widget in main_frame.winfo_children():
             widget.destroy()
 
-        label = tk.Label(
-        main_frame,
-        text = "Enter bank account name (new CSV):"
-        )
-        label.pack()
-        
-        table_name = tk.StringVar()
-        name_entry = tk.Entry(
-            main_frame,
-            textvariable = table_name
-            
-        )
-        name_entry.pack()
+        # New account label and entry
+        tk.Label(main_frame, text="Enter a new bank account name:").pack(pady=(10, 0))
+        table_name_var = tk.StringVar()
+        tk.Entry(main_frame, textvariable=table_name_var).pack()
 
-        label = tk.Label(
-        main_frame,
-        text = "Enter bank account name (Existing CSV):"
-        )
-        label.pack(pady = 20)
-
+        # Existing account label and dropdown
+        tk.Label(main_frame, text="Or select an existing account:").pack(pady=(20, 0))
         tables = db.get_account_tables()
         tables.insert(0, "None")
+        table_dropdown = ttk.Combobox(main_frame, values=tables, state="readonly")
+        table_dropdown.current(0)
+        table_dropdown.pack(pady=10)
 
-
-
-        dropdown = ttk.Combobox(main_frame, values=tables, state = "readonly")
-        dropdown.current(0)
-        dropdown.pack(pady =10)
-
-        categorize_btn = tk.Button(
+        # Button to categorize data
+        tk.Button(
             main_frame,
-            text = "Categorize Data",
-            command = lambda: validate_data(file, table_name.get().upper(), dropdown.get())
+            text="Categorize Data",
+            command=lambda: validate_data(file_path, table_name_var.get().upper(), table_dropdown.get())
+        ).pack(pady=10)
 
-        )
-        categorize_btn.pack()
-        
-    def categorize_data(file, table_name):
+    def categorize_data(file_path, table_name):
+        db.create_table(table_name)
+        transaction_index = [0]
 
-        db.create_table(table_name) ## works for both entry and dropdown
+        with open(file_path) as f:
+            reader = csv.reader(f)
+            data = list(reader)[1:]  # Skip header
 
-        transaction_index = [0]  # mutable index to track current position
+        dropdown_var = tk.StringVar()
 
-        with open(file) as f:
-            data = list(csv.reader(f))
-            data = data[1:]
+        def show_transaction():
+            for widget in main_frame.winfo_children():
+                widget.destroy()
 
-            dropdown_var = tk.StringVar()
+            if transaction_index[0] < len(data):
+                transaction = data[transaction_index[0]]
+                check_if_already_exists(transaction)
+            else:
+                tk.Label(main_frame, text="🎉 All transactions categorized!").pack(pady=30)
 
-            def next_transaction(data):
+        def check_if_already_exists(transaction):
+            existing_data = db.return_data(table_name)
+            for row in existing_data:
+                print(transaction)
+                print()
+                print(row[1])
+                print(transaction[0])
+                print(row[5])
+                print(transaction[4])
+                ################## Change this to check row[0] and transaction_index[0], then set transaction_index[0] to the last row[0] + 1
+                if str(row[1]).strip() == str(transaction[0]).strip() and str(row[5]).strip() == str(transaction[4]).strip():
+                    transaction_index[0] += 1
+                    show_transaction()
+                    return
+            ask_for_category(transaction)
 
-                data.insert(1, dropdown_var.get())
-                data.insert(0, table_name)
+        def ask_for_category(transaction):
+            amount = transaction[2]
+            balance = transaction[4]
+            trans_type = "income" if transaction[2] == "" else "expense"
+            display_amount = transaction[3] if trans_type == "income" else transaction[2]
+            color = "green" if trans_type == "income" else "red"
+            label_text = "INCOME" if trans_type == "income" else "EXPENSE"
 
-                print(data)
+            # Display info
+            tk.Label(main_frame, text=label_text + ":").pack(pady=(10, 0))
+            tk.Label(main_frame, text=transaction[1]).pack()
+            tk.Label(main_frame, text=f"${display_amount}", fg=color).pack()
 
-                transaction_index[0] += 1
-                show_transaction()
+            # Dropdown for category
+            options = db.get_categories_list(trans_type)
+            dropdown = ttk.Combobox(main_frame, values=options, state="readonly", textvariable=dropdown_var)
+            dropdown.set(options[0])
+            dropdown.pack(pady=10)
 
-            
-            def get_category(transaction):
+            # Next button
+            tk.Button(
+                main_frame,
+                text="Next",
+                command=lambda: save_and_next(transaction, dropdown_var.get(), trans_type)
+            ).pack(pady=20)
 
-                
-
-                if transaction[2] == "":
-                    # Income
-                    tk.Label(main_frame, text="INCOME:").pack(pady=(10, 0))
-                    tk.Label(main_frame, text=transaction[1]).pack()
-                    tk.Label(main_frame, text="$" + str(transaction[3]), fg="green").pack()
-
-                    options = db.get_categories_list("income")
-
-                    data = [transaction[0], "income", transaction[3], transaction[4]]
-
-                    
-
-                
-                else:
-                    # Expense
-                    tk.Label(main_frame, text="EXPENSE:").pack(pady=(10, 0))
-                    tk.Label(main_frame, text=transaction[1]).pack()
-                    tk.Label(main_frame, text="$" + str(transaction[2]), fg="red").pack()
-
-                    options = db.get_categories_list("expense")
-
-                    data = [transaction[0], "expense", transaction[2], transaction[4]]
-
-                # Button to go to the next transaction
-                dropdown = ttk.Combobox(main_frame, values=options, state = "readonly", textvariable = dropdown_var)
-                dropdown.set(options[0])
-                dropdown.pack()
-
-                tk.Button(main_frame, text="Next", command= lambda: next_transaction(data)).pack(pady=20)
-
-        
-            def show_transaction():
-                for widget in main_frame.winfo_children():
-                    widget.destroy()
-
-                if transaction_index[0] < len(data):
-                    transaction = data[transaction_index[0]]
-                    get_category(transaction)
-                else:
-                    tk.Label(main_frame, text="All transactions categorized!").pack()
-            window.bind("<Return>", lambda event: next_transaction())
+        def save_and_next(transaction, category, trans_type):
+            # Format: table, date, category, type, amount, balance
+            if trans_type == "income":
+                amount = transaction[3]
+            else:
+                amount = transaction[2]
+            db.add_data(table_name, transaction[0], category, trans_type, amount, transaction[4])
+            transaction_index[0] += 1
             show_transaction()
 
-                
+        # Allow pressing Enter to go to next
+        window.bind("<Return>", lambda event: show_transaction())
+
+        show_transaction()
 
     def get_csv_file():
-        file_path = filedialog.askopenfilename(title="Select CSV File", filetypes=[("CSV Files", "*.csv")])
-
-        if file_path == "":
-            messagebox.showerror("Error", "No CSV file was uploaded")
+        file_path = filedialog.askopenfilename(
+            title="Select CSV File",
+            filetypes=[("CSV Files", "*.csv")]
+        )
+        if not file_path:
+            messagebox.showerror("Error", "No CSV file was selected.")
         else:
             get_file_name(file_path)
 
-            
-        
-        
-    has_csv = False
-
-    WIDTH = 500
-    HEIGHT = 400
-
+    # GUI window setup
+    WIDTH, HEIGHT = 500, 400
     window = tk.Tk()
-    window.title("Upload CSVs")
+    window.title("Upload and Categorize CSV")
     window.geometry(f"{WIDTH}x{HEIGHT}")
 
     main_frame = tk.Frame(window)
     main_frame.pack()
 
-    num_files = int(len(db.get_account_tables()))
+    # Show total uploaded files
+    num_files = len(db.get_account_tables())
+    tk.Label(window, text=f"Total Files Uploaded: {num_files}").place(x=5, y=HEIGHT - 30)
 
-    ## Shows how many files user has in the app
-    file_label = tk.Label(
-        window,
-        text = "Total Files Uploaded: "+str(num_files)
-    )
-    file_label.place(x=5, y = HEIGHT - 30)
-
-    csv_btn = tk.Button(
+    # Upload button
+    tk.Button(
         main_frame,
-        text = "Upload CSV",
-        command= get_csv_file
-    )
-    csv_btn.pack()
+        text="Upload CSV",
+        command=get_csv_file
+    ).pack(pady=20)
 
     window.mainloop()
+
+# Call the function to run the app
 get_csv_data()
-
-

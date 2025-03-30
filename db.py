@@ -40,6 +40,7 @@ def create_table(name):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date TEXT,
             category TEXT,
+            type TEXT,
             amount REAL,
             balance REAL
         )
@@ -52,7 +53,7 @@ def add_data(table_name, date, category, type, amount, balance):
 
         cursor.execute(f'''
         INSERT INTO {table_name} (date, category, type, amount, balance)
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         ''', (date, category, type, amount, balance))
 
 
@@ -94,6 +95,16 @@ def get_categories_list(type):
         categories = [category[2] for category in categories if category[1] == type]
     
     return categories
+
+def return_data(table_name):
+
+    with get_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(f'''SELECT * FROM {table_name}''')
+        categories = cursor.fetchall()
+
+        return categories
 
 
 
