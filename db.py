@@ -5,10 +5,10 @@ def get_connection():
 
 
 def create_category_table():
-    expenses = ["Unknown", "Dining Out", "Groceries", "Entertainment", "Rent", 
+    expenses = ["Add New", "Unknown", "Dining Out", "Groceries", "Entertainment", "Rent", 
                 "Clothes", "Travel", "Transportation", "Health / Hygiene", "Pay For"]
     
-    incomes = ["Unknown", "Work", "Pay Back", "Gift"]
+    incomes = ["Add Mew", "Unknown", "Work", "Pay Back", "Gift"]
     
     with get_connection() as conn:
         cursor = conn.cursor()

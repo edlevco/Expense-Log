@@ -47,6 +47,7 @@ def get_csv_data():
             data = list(reader)[1:]  # Skip header
 
         dropdown_var = tk.StringVar()
+        new_category_entry_var = tk.StringVar()
 
         def show_transaction():
             for widget in main_frame.winfo_children():
@@ -93,6 +94,13 @@ def get_csv_data():
             dropdown.set(options[0])
             dropdown.pack(pady=10)
 
+            # Entry for add new category
+            tk.Label(main_frame, text="Enter New Category Name:").pack(pady=(10, 0))
+            tk.Label(main_frame, text="(Only if dropdown is 'Add New')").pack()
+
+            category_entry = tk.Entry(main_frame, textvariable=new_category_entry_var)
+            category_entry.pack()
+            
             # Next button
             tk.Button(
                 main_frame,
@@ -101,6 +109,11 @@ def get_csv_data():
             ).pack(pady=20)
 
         def save_and_next(transaction, category, trans_type):
+
+            if category == "Add New":
+                print(new_category_entry_var.get())
+                ## resrt entry back to nothing
+
             # Format: table, date, category, type, amount, balance
             if trans_type == "income":
                 amount = transaction[3]
