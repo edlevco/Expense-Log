@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox
 import csv
 import db
 
+
 def get_csv_data():
     db.create_category_table()
 
@@ -39,6 +40,7 @@ def get_csv_data():
         ).pack(pady=10)
 
     def categorize_data(file_path, table_name):
+        update_num_files()
         db.create_table(table_name)
         transaction_index = [0]
 
@@ -62,12 +64,7 @@ def get_csv_data():
         def check_if_already_exists(transaction):
             existing_data = db.return_data(table_name)
             for row in existing_data:
-                print(transaction)
-                print()
-                print(row[1])
-                print(transaction[0])
-                print(row[5])
-                print(transaction[4])
+
                 ################## Change this to check row[0] and transaction_index[0], then set transaction_index[0] to the last row[0] + 1
                 if str(row[1]).strip() == str(transaction[0]).strip() and str(row[5]).strip() == str(transaction[4]).strip():
                     transaction_index[0] += 1
@@ -111,8 +108,17 @@ def get_csv_data():
         def save_and_next(transaction, category, trans_type):
 
             if category == "Add New":
-                print(new_category_entry_var.get())
-                ## resrt entry back to nothing
+
+                if new_category_entry_var.get() == "":
+                    messagebox.showerror("error", "Enter Category Name Into Entry Box")
+                    show_transaction()
+                    return
+
+                category = new_category_entry_var.get().capitalize()
+                db.add_category(trans_type, category)
+
+            new_category_entry_var.set("")  
+            ## resrt entry back to nothing
 
             # Format: table, date, category, type, amount, balance
             if trans_type == "income":
@@ -138,6 +144,9 @@ def get_csv_data():
         else:
             get_file_name(file_path)
 
+    def run_main():
+        window.destroy()
+
     # GUI window setup
     WIDTH, HEIGHT = 500, 400
     window = tk.Tk()
@@ -146,11 +155,14 @@ def get_csv_data():
 
     main_frame = tk.Frame(window)
     main_frame.pack()
+    def update_num_files():
+        # Show total uploaded files
+        num_files = len(db.get_account_tables())
+        tk.Label(window, text=f"Total Files Uploaded: {num_files}").place(x=5, y=HEIGHT - 30)
 
-    # Show total uploaded files
-    num_files = len(db.get_account_tables())
-    tk.Label(window, text=f"Total Files Uploaded: {num_files}").place(x=5, y=HEIGHT - 30)
-
+        if num_files > 0:
+            tk.Button(window, text = "Continue to report", command= run_main).place(x = 5, y= HEIGHT - 60)
+    update_num_files()
     # Upload button
     tk.Button(
         main_frame,
@@ -160,5 +172,4 @@ def get_csv_data():
 
     window.mainloop()
 
-# Call the function to run the app
-get_csv_data()
+

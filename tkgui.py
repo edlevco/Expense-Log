@@ -9,7 +9,7 @@ import csv
 def ui(window):
 
     WINDOW_HEIGHT = window.winfo_height()
-    
+
 
         # Define colors
     BLUE = "#2C3E50"  # Dark sidebar
@@ -25,32 +25,6 @@ def ui(window):
     # **Store Image Globally to Prevent Garbage Collection**
     logo = tk.PhotoImage(file="assets/el.png")  # Make sure the path is correct
     resized_logo = logo.subsample(4,4)
-
-    def upload_csv():
-        file_path = filedialog.askopenfilename(title="Select CSV File", filetypes=[("CSV Files", "*.csv")])
-        messagebox.showinfo("Info", "CSV file uploaded successfully")
-
-        with open(file_path) as file:
-            
-            data = list(csv.reader(file))
-            data.pop(0)
-
-            item_num = 0
-
-            label = tk.Label(content, text = "")
-            label.pack()
-
-
-
-
-
-
-
-
-
-            
-        
-
 
     # Function to change content based on button click
     def show_page(page_name):
@@ -69,9 +43,9 @@ def ui(window):
             tk.Label(content, text="💸 Add Expense", font=("Arial", 16)).pack(pady=20)
             tk.Entry(content, width=30).pack(pady=5)  # Input field example
         elif page_name == "add_csv":
-            # Create Upload Button
-            btn_upload = tk.Button(content, text="Upload CSV", command=upload_csv, padx=10, pady=5)
-            btn_upload.pack(pady=20)
+            tk.Label(content, text="To create a new CSV / Account or add new data \n- > Close and re open the app", font=("Arial", 16)).pack(pady=20)
+            tk.Entry(content, width=30).pack(pady=5)  # Input field example
+            
         else:
             tk.Label(content, text="🏠 Home Page", font=("Arial", 16)).pack(pady=20)
 

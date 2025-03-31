@@ -8,7 +8,7 @@ def create_category_table():
     expenses = ["Add New", "Unknown", "Dining Out", "Groceries", "Entertainment", "Rent", 
                 "Clothes", "Travel", "Transportation", "Health / Hygiene", "Pay For"]
     
-    incomes = ["Add Mew", "Unknown", "Work", "Pay Back", "Gift"]
+    incomes = ["Add New", "Unknown", "Work", "Pay Back", "Gift"]
     
     with get_connection() as conn:
         cursor = conn.cursor()
