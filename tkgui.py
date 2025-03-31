@@ -1,17 +1,18 @@
-
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import csv
+import db
 
 
 def ui(window):
+    account_names = db.get_account_tables()
+    current_account = account_names[0]
 
     WINDOW_HEIGHT = window.winfo_height()
 
-
-        # Define colors
+    # Define colors
     BLUE = "#2C3E50"  # Dark sidebar
 
     # Create sidebar frame (left panel)
@@ -19,12 +20,19 @@ def ui(window):
     sidebar.pack(side="left", fill="y")
 
     # Create main content frame (right panel)
-    content = tk.Frame(window, width=600, height=WINDOW_HEIGHT, bg="white")
+    content = tk.Frame(window, width=600, height=WINDOW_HEIGHT)
     content.pack(side="right", fill="both", expand=True)
 
-    # **Store Image Globally to Prevent Garbage Collection**
-    logo = tk.PhotoImage(file="assets/el.png")  # Make sure the path is correct
-    resized_logo = logo.subsample(4,4)
+    # Store image globally to prevent garbage collection
+    logo = tk.PhotoImage(file="assets/el.png")  # Ensure the path is correct
+    resized_logo = logo.subsample(4, 4)
+
+    # Function to change the current account
+    def change_account(new_account):
+        nonlocal current_account
+        current_account = new_account
+        messagebox.showinfo("Account Changed", f"Current account set to: {current_account}")
+        show_page("home")
 
     # Function to change content based on button click
     def show_page(page_name):
@@ -32,42 +40,41 @@ def ui(window):
         for widget in content.winfo_children():
             widget.destroy()
 
-
-        
         if page_name == "visualize":
             tk.Label(content, text="📊 Data Visualization", font=("Arial", 16)).pack(pady=20)
-        elif page_name == "add_income":
-            tk.Label(content, text="💰 Add Income", font=("Arial", 16)).pack(pady=20)
-            tk.Entry(content, width=30).pack(pady=5)  # Input field example
-        elif page_name == "add_expense":
-            tk.Label(content, text="💸 Add Expense", font=("Arial", 16)).pack(pady=20)
-            tk.Entry(content, width=30).pack(pady=5)  # Input field example
+
         elif page_name == "add_csv":
-            tk.Label(content, text="To create a new CSV / Account or add new data \n- > Close and re open the app", font=("Arial", 16)).pack(pady=20)
-            tk.Entry(content, width=30).pack(pady=5)  # Input field example
-            
+            tk.Label(content, text="To create a new CSV / Account or add new data \n-> Close and re-open the app", font=("Arial", 16)).pack(pady=20)
+            tk.Entry(content, width=30).pack(pady=5)
+
+        elif page_name == "change_account":
+            tk.Label(content, text="Select an Account:", font=("Arial", 14)).pack(pady=10)
+            for name in account_names:
+                tk.Button(content, text=name, font=("Arial", 12), command=lambda n=name: change_account(n)).pack(pady=5)
+
         else:
             tk.Label(content, text="🏠 Home Page", font=("Arial", 16)).pack(pady=20)
+            tk.Label(content, text=f"Current account: {current_account}", font=("Arial", 12)).pack(pady=5)
 
-
-
-        # **Display the Image Inside Content Frame**
+        # Display the logo
         image_label = tk.Label(content, image=resized_logo, bg="white")
+        image_label.image = resized_logo  # Keep a reference
         image_label.place(x=10, y=10)
 
     # Create sidebar buttons
     buttons = [
         ("🏠 Home", "home"),
         ("📊 Visualize", "visualize"),
-        ("💰 Add Income", "add_income"),
-        ("💸 Add Expense", "add_expense"),
-        ("➕ Upload CSV", "add_csv")
+        ("➕ Upload CSV", "add_csv"),
+        ("🔄 Change Accounts", "change_account")
     ]
 
     for text, page in buttons:
-        btn = tk.Button(sidebar, text=text, font=("Arial", 12), fg=BLUE,
-                        activebackground="#34495E", activeforeground="white", bd=0,
-                        command=lambda p=page: show_page(p))
+        btn = tk.Button(
+            sidebar, text=text, font=("Arial", 12), fg="black", bg=BLUE,
+            activebackground="#34495E", activeforeground="white", bd=0,
+            command=lambda p=page: show_page(p)
+        )
         btn.pack(fill="x", pady=5, padx=10)
 
     # Show home page by default
