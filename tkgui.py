@@ -10,6 +10,18 @@ def ui(window):
     account_names = db.get_account_tables()
     current_account = account_names[0]
 
+    data = db.return_data(current_account)
+
+    total = 0
+
+    for row in data:
+        if row[2] == "Dining Out":
+            print(row[4])
+            total += row[4]
+
+    print(f"total:" + str(total))
+
+
     WINDOW_HEIGHT = window.winfo_height()
 
     # Define colors
@@ -46,6 +58,9 @@ def ui(window):
         elif page_name == "add_csv":
             tk.Label(content, text="To create a new CSV / Account or add new data \n-> Close and re-open the app", font=("Arial", 16)).pack(pady=20)
             tk.Entry(content, width=30).pack(pady=5)
+
+
+
 
         elif page_name == "change_account":
             tk.Label(content, text="Select an Account:", font=("Arial", 14)).pack(pady=10)
