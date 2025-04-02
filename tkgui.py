@@ -71,6 +71,37 @@ def ui(window):
             tk.Label(content, text="🏠 Home Page", font=("Arial", 16)).pack(pady=20)
             tk.Label(content, text=f"Current account: {current_account}", font=("Arial", 12)).pack(pady=5)
 
+            home_frame = tk.Frame(content)
+            home_frame.pack(expand=True, fill="both")
+
+            # Configure 10 rows and 10 columns to expand evenly
+            for i in range(10):
+                home_frame.rowconfigure(i, weight=1)
+                home_frame.columnconfigure(i, weight=1)
+            total = 0
+            for i, account in enumerate(account_names):
+                
+                balance = db.get_balance(account)
+                total += balance
+                tk.Label(home_frame, text = account + "Balance: ").grid(row = i, column = 0, sticky="w")
+                tk.Label(home_frame, text = "$" + str(balance)).grid(row = i, column = 1, sticky = "w" )
+
+                if i == len(account_names) - 1:
+                    tk.Label(home_frame, text = "Total: ").grid(row = i+1, column = 0, sticky="w")
+                    tk.Label(home_frame, text = "$" + str(total)).grid(row = i+1, column = 1, sticky = "w" )
+
+
+
+
+
+
+
+
+
+            
+
+
+
         # Display the logo
         image_label = tk.Label(content, image=resized_logo, bg="white")
         image_label.image = resized_logo  # Keep a reference

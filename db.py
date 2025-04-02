@@ -105,6 +105,13 @@ def return_data(table_name):
         categories = cursor.fetchall()
 
         return categories
+    
+def get_balance(table_name):
+    categories = return_data(table_name)
+
+    return categories[-1][5]
+
+    
 
 
 

@@ -21,6 +21,7 @@ def get_csv_data():
 
         # New account label and entry
         tk.Label(main_frame, text="Enter a new bank account name:").pack(pady=(10, 0))
+        tk.Label(main_frame, text="(Must be one word)").pack(pady=(10, 0))
         table_name_var = tk.StringVar()
         tk.Entry(main_frame, textvariable=table_name_var).pack()
 
