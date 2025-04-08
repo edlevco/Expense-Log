@@ -4,6 +4,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 import csv
 import db
+from datetime import datetime, timedelta
 
 
 def ui(window):
@@ -79,19 +80,36 @@ def ui(window):
                 home_frame.rowconfigure(i, weight=1)
                 home_frame.columnconfigure(i, weight=1)
             total = 0
+
+            ## show balances
             for i, account in enumerate(account_names):
                 
                 balance = db.get_balance(account)
                 total += balance
-                tk.Label(home_frame, text = account + "Balance: ").grid(row = i, column = 0, sticky="w")
+                tk.Label(home_frame, text = account + " Balance: ").grid(row = i, column = 0, sticky="w")
                 tk.Label(home_frame, text = "$" + str(balance)).grid(row = i, column = 1, sticky = "w" )
 
                 if i == len(account_names) - 1:
                     tk.Label(home_frame, text = "Total: ").grid(row = i+1, column = 0, sticky="w")
                     tk.Label(home_frame, text = "$" + str(total)).grid(row = i+1, column = 1, sticky = "w" )
 
+            ## show weekly spend
+            current_date = datetime.now()
+            seven_days_ago = datetime.now() - timedelta(days=7)
+            start_month = current_date.replace(day=1)
 
+            past_7 = db.get_total_transactions(current_account, seven_days_ago, current_date)
+            past_month = db.get_total_transactions(current_account, start_month, current_date)
 
+            tk.Label(home_frame, text = "Past 7 Days: ").grid(row = 0, column= 2, sticky="w")
+            tk.Label(home_frame, text = f"${past_7[0]}", fg= "green").grid(row = 0, column= 3, sticky="w")
+            tk.Label(home_frame, text = f"${past_7[1]}", fg = "red").grid(row = 0, column= 4, sticky="w")
+            tk.Label(home_frame, text = f"-> {past_7[0] - past_7[1]}").grid(row = 0, column= 5, sticky="w")
+
+            tk.Label(home_frame, text = "This Month: ").grid(row = 1, column= 2, sticky="w")
+            tk.Label(home_frame, text = f"${past_month[0]}", fg= "green").grid(row = 1, column= 3, sticky="w")
+            tk.Label(home_frame, text = f"${past_month[1]}", fg = "red").grid(row = 1, column= 4, sticky="w")
+            tk.Label(home_frame, text = f"-> {past_month[0] - past_month[1]}").grid(row = 1, column= 5, sticky="w")
 
 
 
@@ -102,6 +120,14 @@ def ui(window):
 
 
 
+
+
+
+
+
+
+
+        
         # Display the logo
         image_label = tk.Label(content, image=resized_logo, bg="white")
         image_label.image = resized_logo  # Keep a reference

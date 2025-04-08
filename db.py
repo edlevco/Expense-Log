@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 def get_connection():
     return sqlite3.connect("finance.db")
@@ -110,6 +111,29 @@ def get_balance(table_name):
     categories = return_data(table_name)
 
     return categories[-1][5]
+
+def get_total_transactions(table_name, start, end):
+    categories = return_data(table_name)
+
+    expense = 0
+    income = 0
+    # start_date = datetime.strptime(start, "%m/%d/%Y")
+    # end_date = datetime.strptime(end, "%m/%d/%Y")
+
+    for category in categories:
+        transaction_date = datetime.strptime(category[1], "%m/%d/%Y")
+        if start <= transaction_date <= end:
+            if category[3] == "expense":
+                expense += category[4]
+            else:
+                income += category[4]
+    
+    return (expense, income)
+
+
+
+
+
 
     
 
