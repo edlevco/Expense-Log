@@ -123,9 +123,11 @@ def get_csv_data():
 
             # Format: table, date, category, type, amount, balance
             if trans_type == "income":
-                amount = transaction[3]
+                amount = float(transaction[3])
             else:
-                amount = transaction[2]
+                amount = float(transaction[2])
+
+            amount = float("{:.2f}".format(amount))
             db.add_data(table_name, transaction[0], category, trans_type, amount, transaction[4])
             transaction_index[0] += 1
             show_transaction()

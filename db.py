@@ -127,8 +127,81 @@ def get_total_transactions(table_name, start, end):
                 expense += category[4]
             else:
                 income += category[4]
-    
+    ## "{:.2f}".format(amount)
+
+    expense = float("{:.2f}".format(expense))
+    income = float("{:.2f}".format(income))
+
     return (expense, income)
+
+def get_top_5(dict):
+    
+
+    sorted_items = sorted(dict.items(), key = lambda x : x[1], reverse=True )[:5]
+
+    categories = [key for key, value in sorted_items]
+    amounts = [value for key, value in sorted_items]
+
+    return (categories, amounts)
+
+def get_total_dict(table_name, type):
+    dict = {}
+
+    expenses = get_categories_list(type)
+
+    for expense in expenses:
+        dict[expense] = 0
+    
+    categories = return_data(table_name)
+
+    for category in categories:
+        if category[3] == type:
+            dict[category[2]] += category[4]
+
+
+    return dict
+
+
+def get_plot_data(table_name):
+    dates = []
+    balances = []
+    categories = return_data(table_name)
+
+    new_date = categories[-1][1]
+
+    dates.append(categories[-1][1])
+    balances.append(categories[-1][5])
+
+    
+    for i in range(len(categories)):
+        index = len(categories)-i-1
+        date = categories[index][1]
+        balance = categories[index][5]
+
+        if not date == new_date:
+            dates.append(date)
+            balances.append(balance)
+            new_date = date
+
+
+    dates.reverse()
+    balances.reverse()
+
+    return dates, balances
+
+
+
+    
+    
+
+    
+
+
+    
+
+    
+
+    
 
 
 
