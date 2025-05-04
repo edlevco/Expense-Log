@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import csv
 import db
+from datetime import datetime
 
 
 def get_csv_data():
@@ -107,6 +108,20 @@ def get_csv_data():
             ).pack(pady=20)
 
         def save_and_next(transaction, category, trans_type):
+
+
+            try:
+                print("try")
+                transaction_date = datetime.strptime(transaction[0], "%m/%d/%Y")
+            except ValueError:
+                print("failed")
+
+                parts = transaction[0].split("-")
+
+                print(parts)
+                
+                y, m, d = parts
+                transaction[0] = f"{m}/{d}/{y}"
 
             if category == "Add New":
 
