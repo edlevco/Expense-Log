@@ -7,6 +7,7 @@ from datetime import datetime
 
 def get_csv_data():
     db.create_category_table()
+    db.create_dict_table()
 
     def validate_data(file, entry, dropdown):
         if entry == "" and dropdown != "None":
@@ -75,6 +76,13 @@ def get_csv_data():
             ask_for_category(transaction)
 
         def ask_for_category(transaction):
+
+
+
+
+
+
+
             amount = transaction[2]
             balance = transaction[4]
             trans_type = "income" if transaction[2] == "" else "expense"
@@ -82,10 +90,38 @@ def get_csv_data():
             color = "green" if trans_type == "income" else "red"
             label_text = "INCOME" if trans_type == "income" else "EXPENSE"
 
+            expense_name = transaction[1].split(" ")[0]
+            category = db.get_category_from_dict(expense_name)
+            if category == None:
+                pass
+            else:
+                save_and_next(transaction, category, trans_type)
+                return
+
             # Display info
             tk.Label(main_frame, text=label_text + ":").pack(pady=(10, 0))
             tk.Label(main_frame, text=transaction[1]).pack()
             tk.Label(main_frame, text=f"${display_amount}", fg=color).pack()
+
+            # Define the variable associated with the checkbox
+            name = transaction[1].split(" ")
+            
+            # Define the variable with no initial selection
+            save_var = tk.StringVar(value="")  # default is no option selected
+
+            if trans_type == "expense":
+
+                # "None" option
+                radio_none = tk.Radiobutton(main_frame, text=f"Do not remember", variable=save_var, value="")
+                radio_none.pack()
+
+                # "1 word" option
+                radio_one = tk.Radiobutton(main_frame, text=f"Remember as {name[0]}", variable=save_var, value="1")
+                radio_one.pack()
+
+                # "2 words" option
+                radio_two = tk.Radiobutton(main_frame, text=f"Remember as {name[:2]}", variable=save_var, value="2")
+                radio_two.pack()
 
             # Dropdown for category
             options = db.get_categories_list(trans_type)
@@ -104,24 +140,24 @@ def get_csv_data():
             tk.Button(
                 main_frame,
                 text="Next",
-                command=lambda: save_and_next(transaction, dropdown_var.get(), trans_type)
+                command=lambda: save_and_next(transaction, dropdown_var.get(), trans_type, save_var.get())
             ).pack(pady=20)
 
-        def save_and_next(transaction, category, trans_type):
+        def save_and_next(transaction, category, trans_type, save_var):
 
 
-            try:
-                print("try")
-                transaction_date = datetime.strptime(transaction[0], "%m/%d/%Y")
-            except ValueError:
-                print("failed")
+            # try:
+            #     print("try")
+            #     transaction_date = datetime.strptime(transaction[0], "%m/%d/%Y")
+            # except ValueError:
+            #     print("failed")
 
-                parts = transaction[0].split("-")
+            #     parts = transaction[0].split("-")
 
-                print(parts)
+            #     print(parts)
                 
-                y, m, d = parts
-                transaction[0] = f"{m}/{d}/{y}"
+            #     y, m, d = parts
+            #     transaction[0] = f"{m}/{d}/{y}"
 
             if category == "Add New":
 
@@ -144,6 +180,12 @@ def get_csv_data():
 
             amount = float("{:.2f}".format(amount))
             db.add_data(table_name, transaction[0], category, trans_type, amount, transaction[4])
+
+            expense_name = transaction[1].split(" ")[0]
+
+            if save_var:
+                db.add_dict_data(expense_name, category)
+
             transaction_index[0] += 1
             show_transaction()
 

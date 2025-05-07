@@ -47,10 +47,51 @@ def create_table(name):
         )
         ''')
 
+def get_category_from_dict(expense_name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+        SELECT category FROM WORD_DICT
+        WHERE expense_name = ?
+        ''', (expense_name,))
+        
+        result = cursor.fetchone()
+        if result:
+            return result[0]  # category
+        else:
+            return None
+
+def create_dict_table():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS WORD_DICT (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            expense_name TEXT,
+            category TEXT
+            
+                       )
+''')
+        
+def add_dict_data(expense_name, category):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute('''
+        INSERT INTO WORD_DICT (expense_name, category)
+        VALUES (?, ?)
+''', (expense_name, category))
+
+
+
 
 def add_data(table_name, date, category, type, amount, balance):
     with get_connection() as conn:
         cursor = conn.cursor()
+
+
 
         cursor.execute(f'''
         INSERT INTO {table_name} (date, category, type, amount, balance)
