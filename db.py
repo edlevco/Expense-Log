@@ -50,17 +50,16 @@ def create_table(name):
 def get_category_from_dict(expense_name):
     with get_connection() as conn:
         cursor = conn.cursor()
+
+        cursor.execute('SELECT expense_name, category FROM WORD_DICT')
+        rows = cursor.fetchall()
+
+        for db_name, category in rows:
+            if db_name.lower() in expense_name.lower():
+                return category
         
-        cursor.execute('''
-        SELECT category FROM WORD_DICT
-        WHERE expense_name = ?
-        ''', (expense_name,))
-        
-        result = cursor.fetchone()
-        if result:
-            return result[0]  # category
-        else:
-            return None
+        return None
+
 
 def create_dict_table():
     with get_connection() as conn:
